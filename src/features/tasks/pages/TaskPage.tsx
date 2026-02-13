@@ -9,6 +9,7 @@ import UpdateTaskModal from "../components/UpdateTaskModal";
 import TaskFilters from "../components/TaskFilters";
 import { usePagination } from "../../../hooks/usePagination";
 import Pagination from "../../../components/Pagination";
+import DeleteTaskModal from "../components/DeleteTaskModal";
 
 
 export default function TaskPage() {
@@ -98,18 +99,18 @@ export default function TaskPage() {
   // ========================
   // DELETE TASK
   // ========================
-  const handleDeleteTask = async (task: Task) => {
-    const confirmed = window.confirm(
-      `Voulez-vous supprimer la tâche "${task.titre}" ?`
-    );
-    if (!confirmed) return;
 
-    await deleteTask(task.id);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+  const handleDeleteClick = (task: Task) => {
+  setTaskToDelete(task);
+  setOpenDelete(true);
   };
 
-  if (isFetching) {
-    return <div className="p-6">Chargement...</div>;
-  }
+  const confirmDelete = async (taskId: string) => {
+  await deleteTask(taskId);
+  };
+
 
   return (
     <>
@@ -161,7 +162,7 @@ export default function TaskPage() {
           tasks={paginatedTasks}
           onView={handleViewTask}
           onEdit={handleEditTask}
-          onDelete={handleDeleteTask}
+          onDelete={handleDeleteClick}
         />
         {totalPages > 1 && (
         <Pagination
@@ -190,6 +191,15 @@ export default function TaskPage() {
             onSubmit={updateTask}
           />
         )}
+        
+        {/* DELETE MODAL */}
+        <DeleteTaskModal
+          open={openDelete}
+          task={taskToDelete}
+          onClose={() => setOpenDelete(false)}
+          onConfirm={confirmDelete}
+        />
+
       </main>
 
     </>
