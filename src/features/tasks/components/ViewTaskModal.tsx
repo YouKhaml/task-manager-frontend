@@ -1,13 +1,15 @@
+import type { Task } from "../types/task";
 import ViewTaskForm from "./ViewTaskForm";
 
 interface Props {
   open: boolean;
+  task: Task | null;
   onClose: () => void;
   
 }
 
-export default function ViewTaskModal({ open, onClose  }: Props) {
-  if (!open) return null;
+export default function ViewTaskModal({ open,task, onClose  }: Props) {
+  if (!open || !task) return null;
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
@@ -17,9 +19,9 @@ export default function ViewTaskModal({ open, onClose  }: Props) {
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h3 className="text-lg font-semibold">Modifier la tâche</h3>
+            <h3 className="text-lg font-semibold">Détail de la tâche</h3>
             <p className="text-sm text-gray-500">
-                 Modifier la tâche pour rester organisé
+                  Informations complètes
             </p>
           </div>
           
@@ -28,10 +30,7 @@ export default function ViewTaskModal({ open, onClose  }: Props) {
           </button>
         </div>
 
-        <ViewTaskForm
-          
-          onCancel={onClose}
-        />
+        <ViewTaskForm task={task} onCancel={onClose} />
       </div>
     </div>
   );

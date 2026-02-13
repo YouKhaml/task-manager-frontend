@@ -1,5 +1,11 @@
+import { formatDateFR } from "../../../utils/formatDate";
+import { STATUT_COLORS, PRIORITE_COLORS } from "../../../utils/taskColors";
+import { STATUT_LABELS , PRIORITE_LABELS } from "../../../utils/taskLabels";
+import { STATUT_ICONS } from "../../../utils/taskStatusIcons";
 import type { Task } from "../types/task";
 import TaskActionsDropdown from "./TaskActionsDropdown";
+import { Calendar } from "lucide-react";
+
 
 interface Props {
   tasks: Task[];
@@ -45,12 +51,72 @@ export default function TaskTable({
               key={task.id}
               className="border-b border-gray-300 hover:bg-gray-50 transition"
             >
-              <td className="p-3 font-medium">{task.titre}</td>
-              <td>{task.description || "-"}</td>
-              <td>{task.statut}</td>
-              <td>{task.priorite}</td>
-              <td>{task.dateFin}</td>
+              <td className="p-3 font-medium">
+                <div className="flex items-center gap-2">
+                  {(() => {
+                      const Icon = STATUT_ICONS[task.statut].icon;
+                      return (
+                        <Icon
+                          size={14}
+                          className={STATUT_ICONS[task.statut].className}
+                        />
+                      );
+                    })()
+                  }
+                  <span className="truncate max-w-[220px]">
+                    {task.titre}
+                  </span>
+                </div>
+              </td>
 
+              <td className="max-w-[200px]">
+                <p className="line-clamp-2">
+                  {task.description || "-"}
+                </p>
+              </td>
+              <td>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium
+                  ${STATUT_COLORS[task.statut]}`}
+                >
+                {STATUT_LABELS[task.statut]}
+                </span>
+              </td>
+
+              <td>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium
+                  ${PRIORITE_COLORS[task.priorite]}`}
+                >
+                {PRIORITE_LABELS[task.priorite]}
+                </span>
+              </td>
+
+              <td>
+                <div className="flex items-center gap-2">
+                  {/* DATE */}
+                  <span
+                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-full
+                      text-xs font-medium
+                      ${
+                        task.enRetard
+                        ? "bg-red-100 text-red-700"
+                        : "bg-gray-100 text-gray-700"
+                      }`}
+                  >
+                    <Calendar size={14} />
+                    {formatDateFR(task.dateFin)}
+                  </span>
+
+                  {/* BADGE EN RETARD */}
+                  {task.enRetard && (
+                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold
+                      bg-red-500 text-white">
+                      En retard
+                    </span>
+                  )}
+                </div>
+              </td>
               {/* ACTIONS */}
               <td className="p-3 text-right">
                 <TaskActionsDropdown
