@@ -47,10 +47,7 @@ export const taskSchema: yup.ObjectSchema<Task> = yup.object({
     .max(50, "Catégorie trop longue")
     .optional(),
 
-  tags: yup
-    .array()
-    .of(yup.string().max(20))
-    .optional(),
+  
 
   niveauUrgence: yup
     .number()

@@ -56,7 +56,7 @@ export function useTasks() {
   // UPDATE TASK
   // ========================
   const updateTask = async (
-    id: number,
+    id: string,
     data: Partial<Task>
   ): Promise<Task> => {
     setIsSubmitting(true);
@@ -84,7 +84,7 @@ export function useTasks() {
   // ========================
   // DELETE TASK
   // ========================
-  const deleteTask = async (id: number): Promise<void> => {
+  const deleteTask = async (id: string): Promise<void> => {
     setIsSubmitting(true);
     setActionError(null);
 
@@ -105,7 +105,7 @@ export function useTasks() {
   // ========================
   // FETCH TASK BY ID
   // ========================
-  const fetchTaskById = async (id: number): Promise<Task> => {
+  const fetchTaskById = async (id: string): Promise<Task> => {
     setActionError(null);
 
     try {

@@ -1,32 +1,54 @@
-import { useForm } from "react-hook-form";
+import { useForm,Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { createTaskSchema } from "../schemas/createTask.schema";
-import type { CreateTaskDto } from "../types/create-task.dto";
-import { PRIORITE, STATUT_TACHE } from "../types/task";
+import { PRIORITE, STATUT_TACHE, type Task } from "../types/task";
+import { taskSchema } from "../schemas/task.schema";
+import { useEffect } from "react";
 
 interface Props {
-  onSubmit: (data: CreateTaskDto) => Promise<any>;
+  taskId: string;
+  task: Task;
+  onSubmit: (id:string,data: Partial<Task>) => Promise<any>;
   onCancel: () => void;
 }
 
-export default function AddTaskForm({ onSubmit, onCancel }: Props) {
+export default function UpdateTaskForm({taskId,task, onSubmit, onCancel }: Props) {
+  console.log(task);
+  const toDateTimeLocal = (date?: string) => {
+  if (!date) return "";
+  return new Date(date).toISOString().slice(0, 16);
+};
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
      setValue,
+     watch,
+     control,
     reset,
-  } = useForm<CreateTaskDto>({
-    resolver: yupResolver(createTaskSchema),
-    defaultValues: {
-      priorite: PRIORITE.MOYENNE,
-      statut: STATUT_TACHE.EN_ATTENTE,
-      niveauUrgence: 3,
-    },
+  } = useForm<Task>({
+    resolver: yupResolver(taskSchema),    
   });
 
-  const submit = async (data: CreateTaskDto) => {
-    await onSubmit(data);
+  useEffect(() => {
+  if (!task) return;
+
+  reset({
+    titre: task.titre,
+    description: task.description,
+    statut: task.statut,
+    priorite: task.priorite,
+    dateDebut: toDateTimeLocal(task.dateDebut),
+    dateFin: toDateTimeLocal(task.dateFin),
+    categorie: task.categorie,
+    niveauUrgence: task.niveauUrgence,
+    
+  });
+}, [task, reset]);
+
+
+  const submit = async (data: Partial<Task>) => {
+    await onSubmit(taskId,data);
     reset();
   };
 
@@ -168,11 +190,11 @@ export default function AddTaskForm({ onSubmit, onCancel }: Props) {
               )}
             </div>
       </div>
-      
+     
       
       <div className="flex space-x-4 items-start">
-       {/* Catégorie */}
-        <div className="flex flex-col w-2/3">
+        {/* Catégorie */}
+         <div className="flex flex-col w-2/3">
         
         <label className="text-sm font-medium mb-1">
                 Catégorie
@@ -190,7 +212,8 @@ export default function AddTaskForm({ onSubmit, onCancel }: Props) {
             `}
         />
       </div>
-        
+     
+
         {/* URGENCE */}
         <div className="w-1/3 flex flex-col">
           <label className="text-sm font-medium mb-1">Niveau d'urgence</label>
@@ -234,7 +257,7 @@ export default function AddTaskForm({ onSubmit, onCancel }: Props) {
             transition
           `}
         >
-          {isSubmitting ? "Création..." : "Créer"}
+          {isSubmitting ? "Mise à jour..." : "Mettre à jour"}
         </button>
       </div>
     </form>

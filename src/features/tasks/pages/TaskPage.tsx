@@ -1,10 +1,15 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import TaskTable from "../components/TaskTable";
 import { useTasks } from "../hooks/useTasks";
 import { Plus } from "lucide-react";
 import AddTaskModal from "../components/AddTaskModal";
 import type { Task } from "../types/task";
 import ViewTaskModal from "../components/ViewTaskModal";
+import UpdateTaskModal from "../components/UpdateTaskModal";
+import TaskFilters from "../components/TaskFilters";
+import { usePagination } from "../../../hooks/usePagination";
+import Pagination from "../../../components/Pagination";
+
 
 export default function TaskPage() {
   const {
@@ -13,28 +18,67 @@ export default function TaskPage() {
     fetchError,
     createTask,
     fetchTaskById,
+    updateTask,
     deleteTask,
+
   } = useTasks();
 
-  const [open, setOpen] = useState(false);
+  const [openAddTask, setOpenAddTask] = useState(false);
   const[openView,setOpenView]=useState(false)
+  const [openUpdate, setOpenUpdate] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  
+ 
+
+
+
+
+
+
+  // ========================
+  // SEARCH TASK 
+  // ========================
+  const [search, setSearch] = useState("");
+  const [statut, setStatut] = useState("");
+  const [priorite, setPriorite] = useState("");
+
+  const filteredTasks = tasks.filter((task) => {
+  const matchSearch =
+    task.titre.toLowerCase().includes(search.toLowerCase()) ||
+    (task.description ?? "").toLowerCase().includes(search.toLowerCase());
+
+  const matchStatut = statut ? task.statut === statut : true;
+  const matchPriorite = priorite ? task.priorite === priorite : true;
+
+  return matchSearch && matchStatut && matchPriorite;
+});
+
+
+
+  const {
+  currentPage,
+  totalPages,
+  paginatedData: paginatedTasks,
+  setCurrentPage,
+} = usePagination(filteredTasks, 5);
+
+
+  useEffect(() => {
+  if (currentPage !== 1) {
+    setCurrentPage(1);
+  }
+}, [search, statut, priorite]);
+
+
 
   // ========================
   // VIEW TASK DETAILS
   // ========================
   const handleViewTask = async (task: Task) => {
-    try {
-      const fullTask = await fetchTaskById(task.id);
-      setSelectedTask(fullTask);
-      console.log("TASK DETAILS:", fullTask);
-      setOpenView(true)
-      console.log("open View",openView);
-      // 👉 ouvrir modal détails ici
-      
-    } catch {
-      // erreur gérée dans le hook
-    }
+    const fullTask = await fetchTaskById(task.id);
+    setSelectedTask(fullTask);
+    setOpenUpdate(false);
+    setOpenView(true);
   };
 
   // ========================
@@ -42,8 +86,13 @@ export default function TaskPage() {
   // ========================
   const handleEditTask = (task: Task) => {
     setSelectedTask(task);
-    console.log("EDIT TASK:", task);
-    // 👉 ouvrir modal édition ici
+    setOpenView(false);
+    setOpenUpdate(true);
+
+    console.log('selected task :',selectedTask)
+
+    
+    
   };
 
   // ========================
@@ -74,7 +123,7 @@ export default function TaskPage() {
         </div>
 
         <button
-          onClick={() => setOpen(true)}
+          onClick={() => setOpenAddTask(true)}
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg"
         >
           <Plus size={16} />
@@ -88,25 +137,63 @@ export default function TaskPage() {
         </div>
       )}
 
+      
+
       {/* CONTENT */}
       <main className="flex-1 p-6 space-y-4">
-        <AddTaskModal
-          open={open}
-          onClose={() => setOpen(false)}
-          onSubmit={createTask}
+    
+        <TaskFilters
+          search={search}
+          statut={statut}
+          priorite={priorite}
+          onSearchChange={setSearch}
+          onStatutChange={setStatut}
+          onPrioriteChange={setPriorite}
         />
          
+        <AddTaskModal
+          open={openAddTask}
+          onClose={() => setOpenAddTask(false)}
+          onSubmit={createTask}
+        />
+
         <TaskTable
-          tasks={tasks}
+          tasks={paginatedTasks}
           onView={handleViewTask}
           onEdit={handleEditTask}
           onDelete={handleDeleteTask}
         />
-        <ViewTaskModal 
-          open={openView}
-           onClose={() => setOpenView(false)}
-       />
+        {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+        )}
+        
+        {/* VIEW MODAL */}
+        {selectedTask && (
+          <ViewTaskModal
+            open={openView}
+            task={selectedTask}
+            onClose={() => setOpenView(false)}
+          />
+        )}
+
+        {/* UPDATE MODAL */}
+        {selectedTask && (
+          <UpdateTaskModal
+            open={openUpdate}
+            task={selectedTask}      // ✅ OBLIGATOIRE
+            taskId={selectedTask.id}
+            onClose={() => setOpenUpdate(false)}
+            onSubmit={updateTask}
+          />
+        )}
       </main>
+
     </>
   );
+  
+  
 }

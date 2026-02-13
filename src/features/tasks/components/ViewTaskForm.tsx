@@ -1,228 +1,168 @@
 import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { PRIORITE, STATUT_TACHE, type Task } from "../types/task";
-import { taskSchema } from "../schemas/task.schema";
+import {  type Task } from "../types/task";
+import { useEffect } from "react";
 
 interface Props {
-  
+  task : Task
   onCancel: () => void;
 }
 
-export default function ViewTaskForm({  onCancel }: Props) {
+export default function ViewTaskForm({ task, onCancel }: Props) {
   const {
     register,
-    formState: { errors },
-     setValue,
     reset,
-  } = useForm<Task>({
-    resolver: yupResolver(taskSchema),
-    defaultValues: {
+  } = useForm<Task>();
+
+  if (!task) return null;
+  useEffect(() => {
+    reset({
+      ...task,
       
-    },
-  });
+    });
+  }, [task, reset]);
+
 
  
-
+const isReadOnly = true;
   return (
     <form  className="space-y-4">
       
       {/* TITRE */}
       <div className="space-y-1">
-            <label className="text-sm font-medium">
-                Titre<span className="text-red-500">*</span>
+            <label className="text-sm font-medium mb-1">
+                Titre
             </label>
 
           <input
               {...register("titre")}
-              placeholder="Nom de la tâche"
-              className={`
-                w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
-                border
-                ${errors.titre ? "border-red-500" : "border-gray-300"}
-                focus:outline-none
-                focus:ring-2
-                ${errors.titre ? "focus:ring-red-500" : "focus:ring-blue-500"}
-                focus:border-transparent
-                transition
-              `}
-          />
-
-          {/* MESSAGE D’ERREUR */}
-          {errors.titre && (
-          <p className="text-red-500 text-sm">
-            {errors.titre.message}
-          </p>
-          )}
+              readOnly={isReadOnly}
+             className="
+                  w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
+                  border border-gray-300
+                  cursor-not-allowed
+                "
+              />
       </div>
 
       {/* DESCTIPTION */}
       <div>
-        <label className="text-sm font-medium">
+        <label className="text-sm font-medium mb-1">
                 Description
         </label>
         
         <textarea
             {...register("description")}
-            placeholder="Description détaillée de la tâche"
-            className={`
-              w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
-              border border-gray-300
-              focus:outline-none
-              focus:ring-2 focus:ring-blue-500
-              focus:border-transparent
-              transition
-            `}
+            readOnly={isReadOnly}
+            className="
+                  w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
+                  border border-gray-300
+                  cursor-not-allowed
+                "
         />
+        
 
       </div>
       <div className="flex space-x-4 items-center">
         {/* Statut */}
         <div className="flex flex-col w-1/2">
           <label className="text-sm font-medium mb-1">Statut</label>
-          <select
+          <input
             {...register("statut")}
+            readOnly={isReadOnly}
             className="
               w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
               border border-gray-300
-              focus:outline-none
-              focus:ring-2 focus:ring-blue-500
-              focus:border-transparent
-              transition"
-          >
-            {Object.values(STATUT_TACHE).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
+              cursor-not-allowed"
+              
+          />
+            
         </div>
 
         {/* Priorité */}
         <div className="flex flex-col w-1/2">
           <label className="text-sm font-medium mb-1">Priorité</label>
-          <select
+          <input
             {...register("priorite")}
             className="
             w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
             border border-gray-300
-            focus:outline-none
-            focus:ring-2 focus:ring-blue-500
-            focus:border-transparent
-            transition"
-          >
-            {Object.values(PRIORITE).map((p) => (
-              <option key={p} value={p}>
-                {p}
-              </option>
-            ))}
-          </select>
+            cursor-not-allowed"
+            disabled
+          />
+            
         </div>
       </div>
       <div className="flex space-x-4 items-center">
             {/* DATE DEBUT */}
             <div>
-              <label className="text-sm font-medium">
+              <label className="text-sm font-medium mb-1">
                 Date début
               </label>
               <input
                 type="datetime-local"
                 {...register("dateDebut")}
-                className={`
+                readOnly={isReadOnly}
+                className="
                   w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
                   border border-gray-300
-                  focus:outline-none
-                  focus:ring-2 focus:ring-blue-500
-                  focus:border-transparent
-                  transition
-                `}
+                  cursor-not-allowed
+                "
               />
+
+
             </div>
             {/* DATE FIN */}
             <div>
-              <label className="text-sm font-medium">
+              <label className="text-sm font-medium mb-1">
                 Date limit
               </label>
               <input
                 type="datetime-local"
                 {...register("dateFin")}
-                className={`
+                readOnly={isReadOnly}
+                className="
                   w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
                   border border-gray-300
-                  focus:outline-none
-                  focus:ring-2 focus:ring-blue-500
-                  focus:border-transparent
-                  transition
-                `}
+                  cursor-not-allowed
+                "
               />
-              {errors.dateFin && (
-                <p className="text-red-500 text-sm">
-                  {errors.dateFin.message}
-                </p>
-              )}
+              
             </div>
       </div>
-      <div>
-        
-        <label className="text-sm font-medium">
-                Catégorie
-        </label>
-        <input
-           {...register("categorie")}
-           placeholder="  Catégorie (ex: Travail, Personnel)"
-           className={`
-              w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
-              border border-gray-300
-              focus:outline-none
-              focus:ring-2 focus:ring-blue-500
-              focus:border-transparent
-              transition
-            `}
-        />
-      </div>
+      
       
       <div className="flex space-x-4 items-start">
-        {/* TAG */}
-        <div className="w-3/4 flex flex-col">
-          <label className="text-sm font-medium mb-1">Tag</label>
-          <input
-            placeholder="Tags (séparés par des virgules)"
-            className="
-              w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
-              border border-gray-300
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-              focus:border-transparent
-              transition
-              "
-            onChange={(e) =>
-              setValue(
-                "tags",
-                e.target.value
-                .split(",")
-                .map((tag) => tag.trim())
-                .filter(Boolean)
-              )
-            }
-          />
+        {/* Catégorie */}
+        <div className="flex flex-col w-2/3">
+            <label className="text-sm font-medium mb-1">
+                Catégorie
+            </label>
+            <input
+              {...register("categorie")}
+              readOnly={isReadOnly}
+              placeholder="  Catégorie (ex: Travail, Personnel)"
+              className="
+                  w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
+                  border border-gray-300
+                  cursor-not-allowed
+                "
+            />
         </div>
+        
         {/* URGENCE */}
         <div className="w-1/3 flex flex-col">
           <label className="text-sm font-medium mb-1">Niveau d'urgence</label>
           <input
             type="number"
             {...register("niveauUrgence")}
-            min={1}
-            max={5}
+            readOnly={isReadOnly}
             className="
-              w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
-              border border-gray-300
-              focus:outline-none focus:ring-2 focus:ring-blue-500
-              focus:border-transparent
-              transition
-              "
+                  w-full rounded-md bg-gray-100 px-3 py-1.5 text-sm
+                  border border-gray-300
+                  cursor-not-allowed
+                "
           />
-          {errors.niveauUrgence && (
-            <p className="text-red-500 text-sm">{errors.niveauUrgence.message}</p>
-          )}
+          
         </div>
       </div>
 

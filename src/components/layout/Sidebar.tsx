@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 const menuItems = [
   {
     label: "Dashboard",
-    path: "/",
+    path: "/dashboard",
   },
   {
     label: "Mes tâches",
